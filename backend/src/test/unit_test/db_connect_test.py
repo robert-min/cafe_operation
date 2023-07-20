@@ -1,5 +1,3 @@
-import uuid
-import base64
 from unittest import TestCase
 from enum import Enum
 from lib.db_connect import MySQLManager
@@ -13,7 +11,7 @@ class Mock(Enum):
     PASSWORD = "12312312"
 
 
-class MySQLManagerTestCase(TestCase):
+class MySQLManagerAuthTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         MySQLManager.insert_user_auth(Mock.PHONE_NUMBER.value, Mock.PASSWORD.value)
@@ -23,6 +21,10 @@ class MySQLManagerTestCase(TestCase):
         result = MySQLManager.get_user_auth(Mock.PHONE_NUMBER.value)
         self.assertEqual(result["phone_number"], Mock.PHONE_NUMBER.value)
         self.assertEqual(result["password"], Mock.PASSWORD.value)
+        
+    def test_get_user_all_auth_number(self):
+        result = MySQLManager.get_user_all_auth_number()
+        self.assertIn(Mock.PHONE_NUMBER.value, result)
         
     @classmethod
     def tearDownClass(cls) -> None:
