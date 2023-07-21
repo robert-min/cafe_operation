@@ -7,7 +7,7 @@ def extract_korean_initial(text: str) -> str:
         result += j2hcj(h2j(t))[0]
     return result
 
-def make_respose(result: str or list) -> dict:
+def make_respose(result: any) -> dict:
     return {
         "meta": {
             "code": 200,
