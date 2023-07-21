@@ -20,3 +20,6 @@ with open(conf_file, "rt") as f:
     conf = json.load(f)
 
 MYSQL_CONNECTION = conf["mysql_connection"][ENV]
+ENCRYTION_KEY = conf["encryption_key"][ENV]
+
+
