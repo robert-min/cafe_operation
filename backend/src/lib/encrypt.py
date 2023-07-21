@@ -1,3 +1,15 @@
+"""Encrypt&Decrypt  library
+
+EncryptManager:
+    - 유저 비밀번호 암호화를 위한 Encrypt Manager 입니다.
+    Functions:
+        - encrypt_password: 유저의 비밀번호를 암호화합니다.
+        - decrypt_password: 유저의 비밀번호를 복호화합니다.
+
+Raises:
+    EncryptManagerError: EncryptManager 클래스에서 발생한 오류
+
+"""
 import base64
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
