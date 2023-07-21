@@ -21,6 +21,27 @@ auth_router = APIRouter(prefix="/auth")
 
 @auth_router.post("/signup")
 async def signup_user(user: User):
+    """POST /auth/signup
+    ## Sign up user api
+    It receives phone_number, password as body values.
+    The password is encrypted with a dek.
+    Phone_number and password are stored in user_auth table.
+    
+    ## Body:
+        phone_number (str): user phone_number
+        password (str): user password
+    
+    ## Response:
+        {
+            "meta": {
+                "code": 200,
+                "message": "ok"
+                },
+            "data": {
+                "phone_number": phone_number
+            }
+        }
+    """
     try:
         # check user input signup validate
         ApiValidator.check_user_signup(user.phone_number)
@@ -30,7 +51,7 @@ async def signup_user(user: User):
         
         # Insert user auth in DB
         result = MySQLManager.insert_user_auth(user.phone_number, encrypt_password)
-        return make_respose(result)
+        return make_respose({"phone_number": result})
     except BadRequestError as e:
         raise CustomHttpException(400, error=e)
     except (MySQLManagerError, EncryptManagerError) as e:
@@ -41,6 +62,28 @@ async def signup_user(user: User):
 
 @auth_router.post("/login")
 async def login_user(user: User):
+    """POST /auth/login
+    ## Log in user api
+    It receives phone_number, password as body values.
+    Check the phone_number ​​is the same as those stored in the DB.
+    Check the password is valid as those stored in the DB.
+
+    ## Body:
+        phone_number (str): user phone_number
+        password (str): user password
+    
+    ## Response:
+        {
+            "meta": {
+                "code": 200,
+                "message": "ok"
+                },
+            "data": {
+                "phone_number": phone_number,
+                "token": token
+            }
+        }
+    """
     try:
         # check user input login validate
         ApiValidator.check_user_login(user.phone_number, user.password)
