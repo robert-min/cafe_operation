@@ -5,8 +5,13 @@ MySQLManager:
     Functions:
         - insert_user_auth: 유저의 계정 정보를 저장합니다.
         - delete_user_auth: 유저의 계정 정보를 삭제합니다.
-        - get_user_auth: 유저의 계정 정보를 가져옵니다.
-        - get_user_all_auth_number: DB에 저장된 모든 계정의 전화번호를 가져옵니다.
+        - get_user_auth: 유저의 계정 정보를 조회합니다.
+        - get_user_all_auth_number: DB에 저장된 모든 계정의 전화번호를 조회합니다.
+        - insert_item_info: 유저가 등록한 아이템 정보를 저장합니다.
+        - delete_item_info: 유저가 등록한 아이템 정보를 삭제합니다.
+        - get_item_info: 유저가 등록한 특정 아이템 정보를 조회합니다.
+        - get_all_item: 유저가 등록한 모든 아이템 정보를 조회합니다.
+        - get_search_item: 유저가 검색한 모든 아이템 정보를 조회합니다.
 
 Raises:
     MySQLManagerError: MySQLManager에서 발생한 오류
@@ -127,6 +132,26 @@ class MySQLManager:
                 "Failed to get all user auth phone_number on DB.")
 
     def insert_item_info(self, phone_number: str, params: dict) -> str:
+        """Insert item info from user_item table.
+        Args:
+            **required**
+            phone_number: user phone_number
+            params:
+                category (str): item category
+                selling_price (int): item selling price(판매가)
+                cost_price (int): item cost price(원가)
+                name (str): item name
+                description (str): item description
+                barcode (str): item barcode
+                expiration_date (str): item expiration date
+                size (str): item size. small or large
+            
+        Return:
+            phone_number
+
+        Raise:
+            Failed to insert item info on DB.
+        """
         try:
             with self.session as session:
                 content = Item(
@@ -148,6 +173,17 @@ class MySQLManager:
             raise MySQLManagerError("Failed to insert item info on DB.")
 
     def delete_item_info(self, phone_number: str, seq: int) -> str:
+        """Delete item info from user_item table.
+        Args:
+            phone_number: user phone_number
+            seq: item seq
+            
+        Return:
+            success
+
+        Raise:
+            Failed to delete item info on DB.
+        """
         try:
             with self.session as session:
                 sql = select(Item).filter(Item.phone_number ==
@@ -160,7 +196,30 @@ class MySQLManager:
         except Exception:
             raise MySQLManagerError("Failed to delete item info on DB.")
 
-    def update_item_info(self, phone_number: str, seq: int, params: dict) -> str:
+    def update_item_info(self, phone_number: str, seq: int, params: dict) -> list:
+        """Update item info from user_item table.
+        Args:
+            **required**
+            phone_number: user phone_number
+            seq: item seq
+            
+            **optional** (변경할 파라미터만 입력)
+            params:
+                category (str): item category
+                selling_price (int): item selling price(판매가)
+                cost_price (int): item cost price(원가)
+                name (str): item name
+                description (str): item description
+                barcode (str): item barcode
+                expiration_date (str): item expiration date
+                size (str): item size. small or large
+            
+        Return:
+            [change_params_key, ...]
+
+        Raise:
+            Failed to update item info on DB.
+        """
         try:
             with self.session as session:
                 sql = select(Item).filter(Item.phone_number == phone_number,
@@ -171,6 +230,7 @@ class MySQLManager:
                         exec(f"item_obj.{key} = '{value}'")
                     else:
                         exec(f"item_obj.{key} = int({value})")
+                    # Automatically change search_initial when renaming
                     if key == "name":
                         item_obj.search_initial = extract_korean_initial(value)
                 session.commit()
@@ -178,7 +238,29 @@ class MySQLManager:
         except Exception:
             raise MySQLManagerError("Failed to update item info on DB")
 
-    def get_item_info(self, phone_number: str, seq: int) -> list:
+    def get_item_info(self, phone_number: str, seq: int) -> dict:
+        """Get item info from user_item table.
+        Args:
+            **required**
+            phone_number: user phone_number
+            seq: item seq
+            
+        Return:
+            {
+                "phone_number": obj.phone_number,
+                "category": obj.category,
+                "selling_price": obj.selling_price,
+                "cost_price": obj.cost_price,
+                "name": obj.name,
+                "description": obj.description,
+                "barcode": obj.barcode,
+                "expiration_date": obj.expiration_date,
+                "size": obj.size
+            }
+
+        Raise:
+            Failed to get item info on DB.
+        """
         try:
             with self.session as session:
                 sql = select(Item).filter(Item.phone_number == phone_number,
@@ -199,6 +281,27 @@ class MySQLManager:
             raise MySQLManagerError("Failed to get item info on DB.")
 
     def get_all_item(self, phone_number: str) -> list:
+        """Get all item info from user_item table.
+        Args:
+            **required**
+            phone_number: user phone_number
+            
+        Return:
+            [{
+                "phone_number": obj.phone_number,
+                "category": obj.category,
+                "selling_price": obj.selling_price,
+                "cost_price": obj.cost_price,
+                "name": obj.name,
+                "description": obj.description,
+                "barcode": obj.barcode,
+                "expiration_date": obj.expiration_date,
+                "size": obj.size
+            }, ...]
+
+        Raise:
+            Failed to get all item info on DB.
+        """
         try:
             all_item = list()
             with self.session as session:
@@ -217,9 +320,31 @@ class MySQLManager:
                     })
             return all_item
         except Exception:
-            raise MySQLManagerError("Failed to get all item info on DB")
+            raise MySQLManagerError("Failed to get all item info on DB.")
 
     def get_search_item(self, phone_number: str, keyword: str) -> list:
+        """Get all item info from user_item table.
+        Args:
+            **required**
+            phone_number: user phone_number
+            keyword: user input keyword for searching
+            
+        Return:
+            [{
+                "phone_number": obj.phone_number,
+                "category": obj.category,
+                "selling_price": obj.selling_price,
+                "cost_price": obj.cost_price,
+                "name": obj.name,
+                "description": obj.description,
+                "barcode": obj.barcode,
+                "expiration_date": obj.expiration_date,
+                "size": obj.size
+            }, ...]
+
+        Raise:
+            Failed to get search item info on DB.
+        """
         try:
             search_item = list()
             with self.session as session:
@@ -239,7 +364,7 @@ class MySQLManager:
                     })
             return search_item
         except Exception:
-            raise MySQLManagerError("Failed to get search item info on DB")
+            raise MySQLManagerError("Failed to get search item info on DB.")
 
 
 class MySQLManagerError(Exception):
