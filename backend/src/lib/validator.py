@@ -31,10 +31,10 @@ class ApiValidator:
         if password != decrypt_password:
             raise UnAuthorizationError("Wrong password. Please check your password.")
     
-    def check_user_valid_input(self, expriation_date: str, size: str) -> None:
-        if not re.match(r"\d{4}-\d{2}-\d{2}", expriation_date):
+    def check_user_valid_input(self, expriation_date: str=None, size: str=None) -> None:
+        if expriation_date and not re.match(r"\d{4}-\d{2}-\d{2}", expriation_date):
             raise BadRequestError("The input does not fit the expriation date format.")
-        if size not in ["small", "large"]:
+        if size and size not in ["small", "large"]:
             raise BadRequestError("The input does not fit the size format. (small or large)")
     
     def check_current_user(self, user: str, token: str) -> None:

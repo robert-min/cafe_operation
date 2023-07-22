@@ -225,16 +225,21 @@ class MySQLManager:
                 sql = select(Item).filter(Item.phone_number == phone_number,
                                           Item.seq == seq)
                 item_obj = session.execute(sql).scalar_one()
+                result = []
                 for key, value in params.items():
+                    if not value:
+                        continue
                     if type(value) is str:
                         exec(f"item_obj.{key} = '{value}'")
                     else:
                         exec(f"item_obj.{key} = int({value})")
+                    result.append(key)
                     # Automatically change search_initial when renaming
                     if key == "name":
                         item_obj.search_initial = extract_korean_initial(value)
+                        result.append("search_initial")
                 session.commit()
-            return list(params.keys())
+            return result
         except Exception:
             raise MySQLManagerError("Failed to update item info on DB")
 
