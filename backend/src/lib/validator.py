@@ -1,4 +1,6 @@
 import re
+import jwt
+from . import TOKEN_KEY
 from .db_connect import MySQLManager
 from .encrypt import EncryptManager
 
@@ -28,6 +30,26 @@ class ApiValidator:
         decrypt_password = self.EncryptManager.decrypt_password(encrypt_password)
         if password != decrypt_password:
             raise UnAuthorizationError("Wrong password. Please check your password.")
+    
+    def check_user_valid_input(self, expriation_date: str, size: str) -> None:
+        if not re.match(r"\d{4}-\d{2}-\d{2}", expriation_date):
+            raise BadRequestError("The input does not fit the expriation date format.")
+        if size not in ["small", "large"]:
+            raise BadRequestError("The input does not fit the size format. (small or large)")
+    
+    def check_current_user(self, user: str, token: str) -> None:
+        # check token existence
+        if token is None:
+            raise BadRequestError("Token does not exist.")
+        # check token expired period
+        try:
+            decode_token = jwt.decode(token, TOKEN_KEY, algorithms=["HS256"])
+            # check wrong used token
+            if decode_token["phone_number"] != user:
+                raise UnAuthorizationError("The wrong approach. Go back to the previous page")
+        except jwt.ExpiredSignatureError:
+            raise UnAuthorizationError("An expired token. Please log in again.")
+
         
         
 class BadRequestError(Exception):
