@@ -41,3 +41,41 @@ async def insert_item(item: Item, user: str = Header(None), authorization: str =
     except Exception as e:
         raise CustomHttpException(500, error=e, message="Unknown error. Contact service manager.")
 
+
+@item_router.delete("/{seq}")
+async def delete_item(seq: int, user: str = Header(None), authorization: str = Header(None)):
+    try:
+        # check user login
+        ApiValidator.check_current_user(user, authorization)
+        
+        # Delete user item in DB
+        result = MySQLManager.delete_item_info(user, seq)
+        return make_respose(result)
+    except BadRequestError as e:
+        raise CustomHttpException(400, error=e)
+    except UnAuthorizationError as e:
+        raise CustomHttpException(401, error=e)
+    except MySQLManagerError as e:
+        raise CustomHttpException(500, error=e, message="Try again in a few minutes.")
+    except Exception as e:
+        raise CustomHttpException(500, error=e, message="Unknown error. Contact service manager.")
+
+
+@item_router.get("/{seq}")
+async def get_item(seq: int, user: str = Header(None), authorization: str = Header(None)):
+    try:
+        # check user login
+        ApiValidator.check_current_user(user, authorization)
+        
+        # Delete user item in DB
+        result = MySQLManager.get_item_info(user, seq)
+        return make_respose(result)
+    except BadRequestError as e:
+        raise CustomHttpException(400, error=e)
+    except UnAuthorizationError as e:
+        raise CustomHttpException(401, error=e)
+    except MySQLManagerError as e:
+        raise CustomHttpException(500, error=e, message="Try again in a few minutes.")
+    except Exception as e:
+        raise CustomHttpException(500, error=e, message="Unknown error. Contact service manager.")
+    

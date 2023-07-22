@@ -34,7 +34,7 @@ async def test_login_user():
             "password": Mock.PASSWORD.value
         })
     assert resp.status_code == 200
-    assert resp.json()["data"]["phone_number"] == Mock.PHONE_NUMBER.value
+    assert resp.json()["data"]["user"] == Mock.PHONE_NUMBER.value
 
 
 @pytest.fixture(scope="module", autouse=True)
