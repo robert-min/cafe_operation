@@ -35,6 +35,7 @@ COPY entrypoint.sh ${MODULE_PATH}/entrypoint.sh
 COPY test.sh ${MODULE_PATH}/test.sh
 
 RUN chmod 755 ${MODULE_PATH}/entrypoint.sh
+RUN chmod +x ${MODULE_PATH}/entrypoint.sh
 
 EXPOSE ${EXPOSE_PORT}
 RUN cd ${MODULE_PATH}
