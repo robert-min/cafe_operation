@@ -42,6 +42,16 @@ class MySQLManager(MySQLManager):
 MySQLManager = MySQLManager()
 authorization = ""
 seq = ""
+params = {
+            "category": Mock.CATEGORY.value,
+            "selling_price": Mock.SELLING_PRICE.value,
+            "cost_price": Mock.COST_PRICE.value,
+            "name": Mock.NAME.value,
+            "description": Mock.DESCRIPTION.value,
+            "barcode": Mock.BARCODE.value,
+            "expiration_date": Mock.EXPIRATION_DATE.value,
+            "size": Mock.SIZE.value
+        }
 
 
 @pytest.mark.order(1)
@@ -68,23 +78,25 @@ async def test_setting():
 @pytest.mark.order(2)
 @pytest.mark.asyncio
 async def test_insert_item():
+    # single case test
     async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
         resp = await ac.post("/item", headers={
             "user": Mock.PHONE_NUMBER.value,
             "Authorization": authorization
-        }, json={
-            "category": Mock.CATEGORY.value,
-            "selling_price": Mock.SELLING_PRICE.value,
-            "cost_price": Mock.COST_PRICE.value,
-            "name": Mock.NAME.value,
-            "description": Mock.DESCRIPTION.value,
-            "barcode": Mock.BARCODE.value,
-            "expiration_date": Mock.EXPIRATION_DATE.value,
-            "size": Mock.SIZE.value
-        })
+        }, json=params)
     assert resp.status_code == 200
     assert resp.json()["data"]["phone_number"] == Mock.PHONE_NUMBER.value
     assert resp.json()["data"]["name"] == Mock.NAME.value
+    
+    # multi case test
+    for i in range(11):
+        async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
+            params["name"] = Mock.NAME.value + str(i)
+            resp = await ac.post("/item", headers={
+                "user": Mock.PHONE_NUMBER.value,
+                "Authorization": authorization
+            }, json=params)
+        assert resp.status_code == 200
 
 
 @pytest.mark.order(3)
@@ -132,7 +144,49 @@ async def test_update_item():
 
 @pytest.mark.order(5)
 @pytest.mark.asyncio
+async def test_get_all_item():
+    async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
+        resp = await ac.get("/item?page_number=0", headers={
+            "user": Mock.PHONE_NUMBER.value,
+            "Authorization": authorization
+        })
+    assert resp.status_code == 200
+    assert len(resp.json()["data"]) == 10
+    async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
+        resp = await ac.get("/item?page_number=1", headers={
+            "user": Mock.PHONE_NUMBER.value,
+            "Authorization": authorization
+        })
+    assert resp.status_code == 200
+    assert (len(resp.json()["data"]) > 0)
+
+
+@pytest.mark.order(6)
+@pytest.mark.asyncio
+async def test_get_search_item():
+    search_keyword = ["아메", "ㅇㅁㄹ", "아메리카", "ㅇㅁㄹㅋㄴ"]
+    for keyword in search_keyword:
+        async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
+            resp = await ac.get(f"/item?page_number=0&keyword={keyword}", headers={
+                "user": Mock.PHONE_NUMBER.value,
+                "Authorization": authorization
+            })
+        assert resp.status_code == 200
+        assert len(resp.json()["data"]) == 10
+        
+        async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
+            resp = await ac.get(f"/item?page_number=1&keyword={keyword}", headers={
+                "user": Mock.PHONE_NUMBER.value,
+                "Authorization": authorization
+            })
+        assert resp.status_code == 200
+        assert (len(resp.json()["data"]) > 0)
+
+
+@pytest.mark.order(7)
+@pytest.mark.asyncio
 async def test_delete_item():
+    # single case test clean
     async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
         resp = await ac.delete(f"/item/{seq}", headers={
             "user": Mock.PHONE_NUMBER.value,
@@ -140,6 +194,15 @@ async def test_delete_item():
         })
     assert resp.status_code == 200
     assert resp.json()["data"] == "success"
+    
+    # multi case test clean
+    for i in range(1, 12):
+        async with AsyncClient(app=app, base_url="http://localhost:8000", follow_redirects=True) as ac:
+            resp = await ac.delete(f"/item/{seq+i}", headers={
+                "user": Mock.PHONE_NUMBER.value,
+                "Authorization": authorization
+            })
+        assert resp.status_code == 200
 
 
 @pytest.fixture(scope="module", autouse=True)

@@ -120,3 +120,27 @@ async def update_item(seq: int, item: UpdateItem, user: str = Header(None), auth
     except Exception as e:
         raise CustomHttpException(
             500, error=e, message="Unknown error. Contact service manager.")
+        
+
+@item_router.get("/")
+async def get_all_item(user: str = Header(None), authorization: str = Header(None), page_number: int = 0, keyword: str = None):
+    try:
+        # check user login
+        ApiValidator.check_current_user(user, authorization)
+        
+        if not keyword:
+            result = MySQLManager.get_all_item(user, page_number)
+        else:
+            result = MySQLManager.get_search_item(user, keyword, page_number)
+        return make_respose(result)
+    except BadRequestError as e:
+        raise CustomHttpException(400, error=e)
+    except UnAuthorizationError as e:
+        raise CustomHttpException(401, error=e)
+    except MySQLManagerError as e:
+        raise CustomHttpException(
+            500, error=e, message="Try again in a few minutes.")
+    except Exception as e:
+        raise CustomHttpException(
+            500, error=e, message="Unknown error. Contact service manager.")
+        

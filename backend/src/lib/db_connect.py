@@ -145,7 +145,7 @@ class MySQLManager:
                 barcode (str): item barcode
                 expiration_date (str): item expiration date
                 size (str): item size. small or large
-            
+
         Return:
             phone_number
 
@@ -177,7 +177,7 @@ class MySQLManager:
         Args:
             phone_number: user phone_number
             seq: item seq
-            
+
         Return:
             success
 
@@ -202,7 +202,7 @@ class MySQLManager:
             **required**
             phone_number: user phone_number
             seq: item seq
-            
+
             **optional** (변경할 파라미터만 입력)
             params:
                 category (str): item category
@@ -213,7 +213,7 @@ class MySQLManager:
                 barcode (str): item barcode
                 expiration_date (str): item expiration date
                 size (str): item size. small or large
-            
+
         Return:
             [change_params_key, ...]
 
@@ -249,7 +249,7 @@ class MySQLManager:
             **required**
             phone_number: user phone_number
             seq: item seq
-            
+
         Return:
             {
                 "phone_number": obj.phone_number,
@@ -290,7 +290,7 @@ class MySQLManager:
         Args:
             **required**
             phone_number: user phone_number
-            
+
         Return:
             [{
                 "phone_number": obj.phone_number,
@@ -310,7 +310,8 @@ class MySQLManager:
         try:
             all_item = list()
             with self.session as session:
-                sql = select(Item).filter(Item.phone_number == phone_number).limit(10).offset(page_number * 10)
+                sql = select(Item).filter(Item.phone_number ==
+                                          phone_number).limit(10).offset(page_number * 10)
                 for obj in session.execute(sql):
                     all_item.append({
                         "phone_number": obj.Item.phone_number,
@@ -333,7 +334,7 @@ class MySQLManager:
             **required**
             phone_number: user phone_number
             keyword: user input keyword for searching
-            
+
         Return:
             [{
                 "phone_number": obj.phone_number,
