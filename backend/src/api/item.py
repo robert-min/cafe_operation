@@ -34,6 +34,39 @@ class UpdateItem(BaseModel):
 
 @item_router.post("/")
 async def insert_item(item: CreateItem, user: str = Header(None), authorization: str = Header(None)):
+    """POST /item
+    ## Insert item api
+    It receives user(phone_number) and Authorization as Header values.
+    And it receives category, selling_price, cost_price, name, description, barcode,
+    expiration_date, and size as body values.
+    
+    ## Headers:
+        user: user_phone_number
+        authorization: login jwt token
+    
+    ## Body:
+        **required params**
+        category (str): item category
+        selling_price (int): item selling price
+        cost_price (int): item cost price
+        name (str): item name
+        description (str): item description
+        barcode (str): item barcode
+        expiration_date (str): item expiration_date **required format: 20XX-XX-XX**
+        size (str): itme size **required format: small, large**
+    
+    ## Response:
+        {
+            "meta": {
+                "code": 200,
+                "message": "ok"
+                },
+            "data": {
+                "phone_number": phone_number,
+                "name": name
+            }
+        }
+    """
     try:
         # check user login
         ApiValidator.check_current_user(user, authorization)
@@ -58,6 +91,24 @@ async def insert_item(item: CreateItem, user: str = Header(None), authorization:
 
 @item_router.delete("/{seq}")
 async def delete_item(seq: int, user: str = Header(None), authorization: str = Header(None)):
+    """Delete /item/{seq}
+    ## Delete item api
+    It receives user(phone_number) and Authorization as Header values.
+    It is deleted based on the seq number assigned to the item.
+    
+    ## Headers:
+        user: user_phone_number
+        authorization: login jwt token
+    
+    ## Response:
+        {
+            "meta": {
+                "code": 200,
+                "message": "ok"
+                },
+            "data": "success"
+        }
+    """
     try:
         # check user login
         ApiValidator.check_current_user(user, authorization)
@@ -79,6 +130,34 @@ async def delete_item(seq: int, user: str = Header(None), authorization: str = H
 
 @item_router.get("/{seq}")
 async def get_item(seq: int, user: str = Header(None), authorization: str = Header(None)):
+    """GET /item/{seq}
+    ## GET item api
+    It receives user(phone_number) and Authorization as Header values.
+    Item information is queried through the seq number assigned to the item.
+    
+    ## Headers:
+        user: user_phone_number
+        authorization: login jwt token
+    
+    ## Response:
+        {
+            "meta": {
+                "code": 200,
+                "message": "ok"
+                },
+            "data": {
+                "phone_number": phone_number,
+                "category": category,
+                "selling_price": selling_price,
+                "cost_price": cost_price,
+                "name": name,
+                "description": description,
+                "barcode": barcode,
+                "expiration_date": expiration_date,
+                "size": size
+            }
+        }
+    """
     try:
         # check user login
         ApiValidator.check_current_user(user, authorization)
@@ -100,6 +179,39 @@ async def get_item(seq: int, user: str = Header(None), authorization: str = Head
 
 @item_router.post("/{seq}")
 async def update_item(seq: int, item: UpdateItem, user: str = Header(None), authorization: str = Header(None)):
+    """POST /item/{seq}
+    ## Update item api
+    It receives user(phone_number) and Authorization as Header values.
+    It receives the item information to be modified as the body value.
+    
+    ## Headers:
+        user: user_phone_number
+        authorization: login jwt token
+    
+    ## Body:
+        **optional params**
+        category (str): item category
+        selling_price (int): item selling price
+        cost_price (int): item cost price
+        name (str): item name
+        description (str): item description
+        barcode (str): item barcode
+        expiration_date (str): item expiration_date **required format: 20XX-XX-XX**
+        size (str): itme size **required format: small, large**
+
+    
+    ## Response:
+        {
+            "meta": {
+                "code": 200,
+                "message": "ok"
+                },
+            "data": {
+                "phone_number": phone_number,
+                "chage_value": [change_params_key, ...]
+            }
+        }
+    """
     try:
         # check user login
         ApiValidator.check_current_user(user, authorization)
@@ -124,10 +236,41 @@ async def update_item(seq: int, item: UpdateItem, user: str = Header(None), auth
 
 @item_router.get("/")
 async def get_all_item(user: str = Header(None), authorization: str = Header(None), page_number: int = 0, keyword: str = None):
+    """GET /item?page_number={page_number}&keyword={keyword}
+    ## GET all item api & Get search item api
+    It receives user(phone_number) and Authorization as Header values.
+    There is a page_number parameter that can be viewed 10 per page.
+    There is a keyword parameter to search for a specific keyword.
+    
+    ## Headers:
+        user: user_phone_number
+        authorization: login jwt token
+
+    ## Response:
+        {
+            "meta": {
+                "code": 200,
+                "message": "ok"
+                },
+            "data": [{
+                "phone_number": phone_number,
+                "category": category,
+                "selling_price": selling_price,
+                "cost_price": cost_price,
+                "name": name,
+                "description": description,
+                "barcode": barcode,
+                "expiration_date": expiration_date,
+                "size": size
+                }, ...
+            ]
+        }
+    """
     try:
         # check user login
         ApiValidator.check_current_user(user, authorization)
         
+        # If there is no keyword, search all items
         if not keyword:
             result = MySQLManager.get_all_item(user, page_number)
         else:

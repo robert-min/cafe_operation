@@ -1,3 +1,26 @@
+"""Model library
+
+User:
+    - user_auth 테이블 DB 객체 model입니다.
+    - seq: 번호
+    - phone_number: user phone_number
+    - password: user password
+    - timestamp: insert timestamp
+
+Item:
+    - user_item 테이블 DB 객체 model입니다.
+    - seq: 번호
+    - phone_number: user phone_number
+    - category: item category
+    - selling_price: item selling_price
+    - cost_price: item cost_price
+    - name: item name
+    - description: item description
+    - expiration_date: item expiration_date
+    - size: item size
+    - search_initial: item search_initial
+    
+"""
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import VARCHAR
 
