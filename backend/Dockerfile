@@ -32,6 +32,7 @@ COPY conf ${MODULE_PATH}/conf
 COPY src ${MODULE_PATH}/src
 COPY requirements.txt ${MODULE_PATH}/requirements.txt
 COPY entrypoint.sh ${MODULE_PATH}/entrypoint.sh
+COPY test.sh ${MODULE_PATH}/test.sh
 
 RUN chmod 755 ${MODULE_PATH}/entrypoint.sh
 
