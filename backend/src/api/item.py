@@ -162,7 +162,7 @@ async def get_item(seq: int, user: str = Header(None), authorization: str = Head
         # check user login
         ApiValidator.check_current_user(user, authorization)
 
-        # Delete user item in DB
+        # Get user item in DB
         result = MySQLManager.get_item_info(user, seq)
         return make_respose(result)
     except BadRequestError as e:
