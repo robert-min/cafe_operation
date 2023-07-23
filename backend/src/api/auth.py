@@ -79,7 +79,7 @@ async def login_user(user: User):
                 "message": "ok"
                 },
             "data": {
-                "phone_number": phone_number,
+                "user": phone_number,
                 "token": token
             }
         }
@@ -90,10 +90,10 @@ async def login_user(user: User):
         
         # make JWT token
         token = jwt.encode({
-                "email": user.phone_number,
+                "phone_number": user.phone_number,
                 "exp": datetime.utcnow() + timedelta(hours=2)
             }, TOKEN_KEY, algorithm="HS256")
-        return make_respose({"phone_number": user.phone_number,"token": token})
+        return make_respose({"user": user.phone_number,"token": token})
     except BadRequestError as e:
         raise CustomHttpException(400, error=e)
     except UnAuthorizationError as e:
@@ -102,4 +102,5 @@ async def login_user(user: User):
         raise CustomHttpException(500, error=e, message="Try again in a few minutes.")
     except Exception as e:
         raise CustomHttpException(500, error=e, message="Unknown error. Contact service manager.")
+
 

@@ -145,7 +145,7 @@ class MySQLManager:
                 barcode (str): item barcode
                 expiration_date (str): item expiration date
                 size (str): item size. small or large
-            
+
         Return:
             phone_number
 
@@ -177,7 +177,7 @@ class MySQLManager:
         Args:
             phone_number: user phone_number
             seq: item seq
-            
+
         Return:
             success
 
@@ -202,7 +202,7 @@ class MySQLManager:
             **required**
             phone_number: user phone_number
             seq: item seq
-            
+
             **optional** (변경할 파라미터만 입력)
             params:
                 category (str): item category
@@ -213,7 +213,7 @@ class MySQLManager:
                 barcode (str): item barcode
                 expiration_date (str): item expiration date
                 size (str): item size. small or large
-            
+
         Return:
             [change_params_key, ...]
 
@@ -225,16 +225,21 @@ class MySQLManager:
                 sql = select(Item).filter(Item.phone_number == phone_number,
                                           Item.seq == seq)
                 item_obj = session.execute(sql).scalar_one()
+                result = []
                 for key, value in params.items():
+                    if not value:
+                        continue
                     if type(value) is str:
                         exec(f"item_obj.{key} = '{value}'")
                     else:
                         exec(f"item_obj.{key} = int({value})")
+                    result.append(key)
                     # Automatically change search_initial when renaming
                     if key == "name":
                         item_obj.search_initial = extract_korean_initial(value)
+                        result.append("search_initial")
                 session.commit()
-            return list(params.keys())
+            return result
         except Exception:
             raise MySQLManagerError("Failed to update item info on DB")
 
@@ -244,7 +249,7 @@ class MySQLManager:
             **required**
             phone_number: user phone_number
             seq: item seq
-            
+
         Return:
             {
                 "phone_number": obj.phone_number,
@@ -280,12 +285,12 @@ class MySQLManager:
         except Exception:
             raise MySQLManagerError("Failed to get item info on DB.")
 
-    def get_all_item(self, phone_number: str) -> list:
+    def get_all_item(self, phone_number: str, page_number: int) -> list:
         """Get all item info from user_item table.
         Args:
             **required**
             phone_number: user phone_number
-            
+
         Return:
             [{
                 "phone_number": obj.phone_number,
@@ -305,7 +310,8 @@ class MySQLManager:
         try:
             all_item = list()
             with self.session as session:
-                sql = select(Item).filter(Item.phone_number == phone_number)
+                sql = select(Item).filter(Item.phone_number ==
+                                          phone_number).limit(10).offset(page_number * 10)
                 for obj in session.execute(sql):
                     all_item.append({
                         "phone_number": obj.Item.phone_number,
@@ -322,13 +328,13 @@ class MySQLManager:
         except Exception:
             raise MySQLManagerError("Failed to get all item info on DB.")
 
-    def get_search_item(self, phone_number: str, keyword: str) -> list:
+    def get_search_item(self, phone_number: str, keyword: str, page_number: int) -> list:
         """Get all item info from user_item table.
         Args:
             **required**
             phone_number: user phone_number
             keyword: user input keyword for searching
-            
+
         Return:
             [{
                 "phone_number": obj.phone_number,
@@ -349,7 +355,7 @@ class MySQLManager:
             search_item = list()
             with self.session as session:
                 sql = select(Item).filter(and_(Item.phone_number == phone_number, or_(
-                    Item.name.like(keyword + '%'), Item.search_initial.like(keyword + '%'))))
+                    Item.name.like(keyword + '%'), Item.search_initial.like(keyword + '%')))).limit(10).offset(page_number * 10)
                 for obj in session.execute(sql):
                     search_item.append({
                         "phone_number": obj.Item.phone_number,

@@ -18,7 +18,9 @@ def create_app():
     
     # router
     from auth import auth_router
+    from item import item_router
     app.include_router(auth_router)
+    app.include_router(item_router)
 
     # error handler
     @app.exception_handler(CustomHttpException)
@@ -27,7 +29,7 @@ def create_app():
             "meta": {
                 "code": exc.code,
                 "error": str(exc.error),
-                "message": exc.message
+                "message": str(exc.error) + exc.message
             },
             "data": None
 
