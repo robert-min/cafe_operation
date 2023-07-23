@@ -285,7 +285,7 @@ class MySQLManager:
         except Exception:
             raise MySQLManagerError("Failed to get item info on DB.")
 
-    def get_all_item(self, phone_number: str) -> list:
+    def get_all_item(self, phone_number: str, page_number: int) -> list:
         """Get all item info from user_item table.
         Args:
             **required**
@@ -310,7 +310,7 @@ class MySQLManager:
         try:
             all_item = list()
             with self.session as session:
-                sql = select(Item).filter(Item.phone_number == phone_number)
+                sql = select(Item).filter(Item.phone_number == phone_number).limit(10).offset(page_number * 10)
                 for obj in session.execute(sql):
                     all_item.append({
                         "phone_number": obj.Item.phone_number,
@@ -327,7 +327,7 @@ class MySQLManager:
         except Exception:
             raise MySQLManagerError("Failed to get all item info on DB.")
 
-    def get_search_item(self, phone_number: str, keyword: str) -> list:
+    def get_search_item(self, phone_number: str, keyword: str, page_number: int) -> list:
         """Get all item info from user_item table.
         Args:
             **required**
@@ -354,7 +354,7 @@ class MySQLManager:
             search_item = list()
             with self.session as session:
                 sql = select(Item).filter(and_(Item.phone_number == phone_number, or_(
-                    Item.name.like(keyword + '%'), Item.search_initial.like(keyword + '%'))))
+                    Item.name.like(keyword + '%'), Item.search_initial.like(keyword + '%')))).limit(10).offset(page_number * 10)
                 for obj in session.execute(sql):
                     search_item.append({
                         "phone_number": obj.Item.phone_number,

@@ -61,6 +61,7 @@ class MySQLManagerAuthTestCase(TestCase):
 class MySQLManagerItemTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        # single case test
         params = {
             "category": Mock.CATEGORY.value,
             "selling_price": Mock.SELLING_PRICE.value,
@@ -72,6 +73,11 @@ class MySQLManagerItemTestCase(TestCase):
             "size": Mock.SIZE.value
         }
         MySQLManager.insert_item_info(Mock.PHONE_NUMBER.value, params)
+        
+        # multi case test
+        for i in range(11):
+            params["name"] = Mock.NAME.value + str(i)
+            MySQLManager.insert_item_info(Mock.PHONE_NUMBER.value, params)
         print("\nSet up module for MySQLManager Item testing lib/db_connect.py")
     
     @staticmethod
@@ -100,13 +106,13 @@ class MySQLManagerItemTestCase(TestCase):
         self.assertEqual(result["cost_price"], change_params["cost_price"])
         
     def test_get_all_item(self):
-        result = MySQLManager.get_all_item(Mock.PHONE_NUMBER.value)
+        result = MySQLManager.get_all_item(Mock.PHONE_NUMBER.value, page_number=1)
         self.assertTrue(result)
         
     def test_get_search_item(self):
         search_keyword = ["아메", "ㅇㅁㄹ", "아메리카", "ㅇㅁㄹㅋㄴ"]
         for keyword in search_keyword:
-            result = MySQLManager.get_search_item(Mock.PHONE_NUMBER.value, keyword)
+            result = MySQLManager.get_search_item(Mock.PHONE_NUMBER.value, keyword, page_number=1)
             self.assertTrue(result)
         
         seq = self.get_seq_num()
@@ -117,7 +123,7 @@ class MySQLManagerItemTestCase(TestCase):
         self.assertIn("name", result)
         search_keyword = ["카페라떼", "ㅋㅍ", "ㅋㅍㄹㄸ", "카페라"]
         for keyword in search_keyword:
-            result = MySQLManager.get_search_item(Mock.PHONE_NUMBER.value, keyword)
+            result = MySQLManager.get_search_item(Mock.PHONE_NUMBER.value, keyword, page_number=0)
             self.assertTrue(result)
         
         change_params = {
@@ -129,8 +135,13 @@ class MySQLManagerItemTestCase(TestCase):
     
     @classmethod
     def tearDownClass(cls) -> None:
+        # single case test clean
         seq = MySQLManager.get_item_seq(Mock.PHONE_NUMBER.value, Mock.NAME.value)
         MySQLManager.delete_item_info(Mock.PHONE_NUMBER.value, seq)
+        
+        # multi case test clean
+        for i in range(1, 12):
+            MySQLManager.delete_item_info(Mock.PHONE_NUMBER.value, seq + i)
         print("\nModule Clean.")
     
 
