@@ -2,7 +2,7 @@
 
 ### 참고사항
 - 개발 과정에서 고려한 사항은 git issues 확인부탁드립니다. [이슈](https://github.com/robert-min/cafe_operation/issues)
-
+- 서비스 테스트 방법은 README.md 아래 서비스 테스트 방법 확인부탁드립니다.
 
 <br>
 
