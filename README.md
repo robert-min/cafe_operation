@@ -9,7 +9,7 @@
 ### File Tree
 
 ```
-./
+./backend
 ├── Dockerfile                      - backend Dockerfile
 ├── README.md                       - README
 ├── app.py                          - run server file
